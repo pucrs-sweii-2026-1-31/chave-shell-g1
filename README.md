@@ -1,59 +1,89 @@
 # chave-shell
 
-Shell App do projeto **Chave** — microfrontend host.
+Shell host do projeto Chave. Esta aplicação React + Vite é o ponto de entrada
+do navegador e delega os fluxos de autenticação para o microfrontend
+`chave-mfe-auth` via Module Federation.
 
-Orquestra os microfrontends remotos via **Module Federation**, consumindo o `chave-mfe-auth` para renderizar as rotas de autenticação. Construído com React + Vite.
+## Responsabilidade
 
----
-
-## Tecnologias
-
-- React 18 + React Router DOM 6
-- Vite 5
-- `@originjs/vite-plugin-federation` — Module Federation
-- `@vitejs/plugin-react`
-
----
+- Executar em `http://localhost:3000`.
+- Controlar o `BrowserRouter` de topo.
+- Renderizar o dashboard em `/`.
+- Encaminhar as demais rotas, como `/login`, `/register` e `/profile`, para o
+  remote `mfe_auth/AuthApp`.
 
 ## Module Federation
 
-Este app atua como **host**, consumindo os seguintes remotos:
+O host se chama `shell` e consome o remote `mfe_auth`.
 
-| Remote | URL padrão |
-|---|---|
-| `mfe_auth` | `http://localhost:4001/assets/remoteEntry.js` |
+| Item | Valor |
+| --- | --- |
+| Remote module | `mfe_auth/AuthApp` |
+| URL padrão | `http://localhost:4001/assets/remoteEntry.js` |
+| Variável de build | `MFE_AUTH_URL` |
+| Shared packages | `react`, `react-dom`, `react-router-dom` |
 
-A URL do remote pode ser sobrescrita via variável de ambiente em build time:
-
-| Variável | Descrição |
-|---|---|
-| `MFE_AUTH_URL` | URL do `remoteEntry.js` do `chave-mfe-auth` |
-
----
-
-## Scripts
-
-| Comando | Descrição |
-|---|---|
-| `npm run dev` | Inicia em modo desenvolvimento na porta 3000 |
-| `npm run build` | Gera o bundle em `dist/` |
-| `npm run preview` | Serve o build na porta 3000 |
-
----
-
-## Desenvolvimento local (sem Docker)
+Exemplo com URL customizada:
 
 ```bash
-npm install
+MFE_AUTH_URL=http://localhost:4001/assets/remoteEntry.js npm run build
+```
+
+## Desenvolvimento local
+
+```bash
+npm ci
 npm run dev
 ```
 
-Acesse: http://localhost:3000
+URLs locais padrão:
 
-> O `chave-mfe-auth` precisa estar rodando em `http://localhost:4001` para que o remote seja carregado corretamente.
+| Serviço | URL |
+| --- | --- |
+| Shell | `http://localhost:3000` |
+| Auth MFE | `http://localhost:4001` |
+| Auth remoteEntry | `http://localhost:4001/assets/remoteEntry.js` |
+| Auth API | `http://localhost:3001` |
+| Swagger | `http://localhost:3001/docs` |
 
----
+## Docker
 
-## Executando com a stack completa
+Build:
 
-Este serviço é orquestrado pelo `chave-infra`. Consulte o [README do chave-infra](https://github.com/pucrs-sweii-2026-1-30/chave-infra).
+```bash
+docker build \
+  --build-arg MFE_AUTH_URL=http://localhost:4001/assets/remoteEntry.js \
+  -t chave-shell .
+```
+
+Run:
+
+```bash
+docker run --rm -p 3000:3000 chave-shell
+```
+
+A imagem usa `npm ci`, gera o build Vite e serve `dist/` com nginx na porta
+`3000`, com fallback de SPA para as rotas delegadas ao microfrontend.
+
+## Docker Compose
+
+Na stack completa, este serviço deve ser iniciado pelo repositório
+`chave-infra`, junto com:
+
+- PostgreSQL
+- `chave-ms-auth`
+- `chave-mfe-auth`
+- `chave-shell`
+- serviço AWS-compatible local em `http://localhost:4566`
+
+O Compose deve passar `MFE_AUTH_URL` durante o build da imagem do shell.
+
+## CI/CD
+
+O workflow em `.github/workflows/ci.yml` executa:
+
+- `npm ci`
+- `npm run build`
+- `docker build`
+- empacotamento e upload do artefato `chave-shell-dist.tar.gz`
+- release quando a referência for uma tag `v*`
