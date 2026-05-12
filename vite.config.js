@@ -11,10 +11,9 @@ export default defineConfig({
     federation({
       name: "shell",
       remotes: {
-        // O Shell consome o remoteEntry exposto pelo chave-mfe-auth
         mfe_auth: MFE_AUTH_URL,
       },
-      shared: ["react", "react-dom"],
+      shared: ["react", "react-dom", "react-router-dom"],
     }),
   ],
   build: {

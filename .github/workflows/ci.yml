@@ -1,0 +1,55 @@
+name: Shell CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - "v*"
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build and package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build shell
+        run: npm run build
+        env:
+          MFE_AUTH_URL: http://localhost:4001/assets/remoteEntry.js
+
+      - name: Build Docker image
+        run: docker build --build-arg MFE_AUTH_URL=http://localhost:4001/assets/remoteEntry.js -t chave-shell:${{ github.sha }} .
+
+      - name: Package dist artifact
+        run: tar -czf chave-shell-dist.tar.gz dist
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chave-shell-dist
+          path: chave-shell-dist.tar.gz
+          if-no-files-found: error
+
+      - name: Release tagged build
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: chave-shell-dist.tar.gz
