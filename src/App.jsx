@@ -23,14 +23,14 @@ class RemoteErrorBoundary extends Component {
       return (
         <main className="shell-page">
           <section className="shell-panel" aria-labelledby="remote-error-title">
-            <p className="shell-eyebrow">Autenticacao</p>
-            <h1 id="remote-error-title">Nao foi possivel abrir esta area</h1>
+            <p className="shell-eyebrow">Autenticação</p>
+            <h1 id="remote-error-title">Não foi possível abrir esta área</h1>
             <p className="shell-copy">
-              O aplicativo de autenticacao remoto nao respondeu. Verifique se o
-              chave-mfe-auth esta disponivel e tente novamente.
+              O microfrontend de autenticação não respondeu. Verifique se o
+              chave-mfe-auth está disponível e tente novamente.
             </p>
             <Link className="shell-link shell-link-primary" to="/">
-              Voltar ao inicio
+              Voltar ao painel
             </Link>
           </section>
         </main>
@@ -46,12 +46,12 @@ function Dashboard() {
     <main className="shell-page">
       <section className="shell-panel" aria-labelledby="dashboard-title">
         <p className="shell-eyebrow">Chave</p>
-        <h1 id="dashboard-title">Dashboard</h1>
+        <h1 id="dashboard-title">Painel</h1>
         <p className="shell-copy">
-          Host principal para acessar os fluxos de autenticacao do sistema.
+          Acesse os fluxos de autenticação pelo shell da aplicação.
         </p>
 
-        <nav className="shell-actions" aria-label="Rotas de autenticacao">
+        <nav className="shell-actions" aria-label="Rotas de autenticação">
           <Link className="shell-link shell-link-primary" to="/login">
             Entrar
           </Link>
@@ -59,7 +59,7 @@ function Dashboard() {
             Criar conta
           </Link>
           <Link className="shell-link" to="/profile">
-            Perfil
+            Conta
           </Link>
         </nav>
       </section>
@@ -74,7 +74,7 @@ function RemoteAuthApp() {
         fallback={
           <main className="shell-page">
             <div className="shell-loading" role="status" aria-live="polite">
-              Carregando autenticacao...
+              Carregando autenticação...
             </div>
           </main>
         }
